@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <title>Volei GO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap">
+        <div class="brand-row">
+          <div class="brand">
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              <circle
+                cx="20"
+                cy="20"
+                r="18"
+                fill="#FFC72C"
+                stroke="#FFFFFF"
+                stroke-width="2"
+              />
+              <path
+                d="M20 2c-4 6-4 14 0 18s12 6 18 2"
+                fill="none"
+                stroke="#1450C8"
+                stroke-width="3"
+              />
+              <path
+                d="M4 12c7-1 13 2 16 8s1 13-4 18"
+                fill="none"
+                stroke="#1450C8"
+                stroke-width="3"
+              />
+              <path
+                d="M20 20c-6 3-13 3-17 0"
+                fill="none"
+                stroke="#1450C8"
+                stroke-width="3"
+              />
+            </svg>
+            <span>Volei <b>GO</b></span>
+          </div>
+          <button class="btn sm admin-access" id="adminAccess" type="button">
+            Entrar como administrador
+          </button>
+          <div class="sync" id="sync"><i></i><span>Conectando…</span></div>
+          <p class="next" id="nextGame"></p>
+        </div>
+        <nav class="tabs" aria-label="Seções">
+          <a href="#jogadores">Jogadores</a>
+          <a href="#sorteio">Sorteio</a>
+          <a href="#campeonato">Campeonato</a>
+          <a href="#placar">Placar</a>
+          <a href="#calendario">Calendário</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <p class="ro-note" id="roNote" hidden>
+        Você está no modo visitante. Entre como administrador para editar os
+        dados compartilhados.
+      </p>
+
+      <!-- JOGADORES -->
+      <section class="view" id="v-jogadores" hidden>
+        <div class="view-head">
+          <div>
+            <h2>Jogadores</h2>
+            <p class="muted">
+              Marque quem está na quadra hoje. Só os presentes entram no
+              sorteio.
+            </p>
+          </div>
+          <div class="counts">
+            <div class="count">
+              <b class="num" id="cTotal">0</b><span>no elenco</span>
+            </div>
+            <div class="count">
+              <b class="num" id="cPres">0</b><span>presentes</span>
+            </div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="panel edit">
+            <h3>Adicionar jogador</h3>
+            <form id="fPlayer" class="row" autocomplete="off">
+              <div class="field" style="flex-basis: 100%">
+                <label for="pName">Nome</label
+                ><input
+                  type="text"
+                  id="pName"
+                  maxlength="40"
+                  placeholder="Ex.: Carol"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="pPos">Posição</label
+                ><select id="pPos"></select>
+              </div>
+              <div class="field">
+                <label for="pLvl">Nível</label
+                ><select id="pLvl">
+                  <option value="1">1 · Iniciante</option>
+                  <option value="2">2 · Básico</option>
+                  <option value="3" selected>3 · Médio</option>
+                  <option value="4">4 · Bom</option>
+                  <option value="5">5 · Craque</option>
+                </select>
+              </div>
+              <button
+                class="btn primary"
+                type="submit"
+                style="flex-basis: 100%"
+              >
+                Adicionar
+              </button>
+            </form>
+            <details>
+              <summary>Colar lista do grupo</summary>
+              <form
+                id="fPaste"
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 10px;
+                  margin-top: 10px;
+                "
+              >
+                <label class="lbl" for="pPaste"
+                  >Um nome por linha. Numeração e emojis são ignorados.</label
+                >
+                <textarea
+                  id="pPaste"
+                  placeholder="1. Carol&#10;2. Diego 🏐&#10;3. Bia"
+                ></textarea>
+                <button class="btn" type="submit">
+                  Adicionar como presentes
+                </button>
+              </form>
+            </details>
+          </div>
+          <div class="panel">
+            <div class="row">
+              <div class="field" style="flex: 1 1 200px">
+                <label for="pSearch">Buscar</label
+                ><input
+                  type="search"
+                  id="pSearch"
+                  placeholder="Nome do jogador"
+                />
+              </div>
+              <div class="row edit" style="align-self: flex-end">
+                <button class="btn sm" id="allIn" type="button">
+                  Todos presentes
+                </button>
+                <button class="btn sm ghost" id="allOut" type="button">
+                  Limpar presença
+                </button>
+              </div>
+            </div>
+            <p class="legend">
+              <span>Bolinhas = nível de 1 a 5</span
+              ><span>Caixa marcada = presente</span>
+            </p>
+            <ul class="plist" id="pList"></ul>
+            <div class="empty" id="pEmpty" hidden>
+              <h3>Nenhum jogador ainda</h3>
+              <p class="muted">
+                Adicione o pessoal ao lado ou cole a lista do grupo. Para testar
+                o site antes, carregue jogadores de exemplo e apague depois.
+              </p>
+              <button class="btn edit" id="loadSample" type="button">
+                Carregar 12 jogadores de exemplo
+              </button>
+            </div>
+            <button
+              class="btn sm ghost edit"
+              id="rmSample"
+              type="button"
+              hidden
+            >
+              Remover jogadores de exemplo
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SORTEIO -->
+      <section class="view" id="v-sorteio" hidden>
+        <div class="view-head">
+          <div>
+            <h2>Sorteio de times</h2>
+            <p class="muted">
+              Escolha o formato e sorteie entre os jogadores presentes.
+            </p>
+          </div>
+        </div>
+        <div class="panel">
+          <div
+            class="row"
+            style="
+              justify-content: space-between;
+              align-items: flex-start;
+              gap: 18px;
+            "
+          >
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <span class="lbl">Formato</span>
+              <div class="seg" id="modeSeg" role="group" aria-label="Formato">
+                <button type="button" data-k="2">2x2</button
+                ><button type="button" data-k="4">4x4</button
+                ><button type="button" data-k="5">5x5</button
+                ><button type="button" data-k="6">6x6</button>
+              </div>
+              <p id="drawInfo" class="muted"></p>
+            </div>
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                max-width: 340px;
+              "
+            >
+              <label class="toggle"
+                ><input type="checkbox" id="optBal" checked /><span
+                  >Equilibrar por nível<small
+                    >Distribui os mais fortes entre os times.</small
+                  ></span
+                ></label
+              >
+              <label class="toggle"
+                ><input type="checkbox" id="optSet" checked /><span
+                  >Um levantador por time<small
+                    >Quando houver levantadores suficientes.</small
+                  ></span
+                ></label
+              >
+            </div>
+          </div>
+          <div class="row edit">
+            <button class="btn go" id="doDraw" type="button">
+              Sortear times
+            </button>
+          </div>
+        </div>
+        <div
+          id="drawOut"
+          style="display: flex; flex-direction: column; gap: 14px"
+        ></div>
+      </section>
+
+      <!-- CAMPEONATO -->
+      <section class="view" id="v-campeonato" hidden>
+        <div class="view-head">
+          <div>
+            <h2>Campeonato</h2>
+            <p class="muted">
+              Qualificação em todos contra todos, depois semifinal e final.
+            </p>
+          </div>
+          <button class="btn sm ghost edit" id="endCup" type="button" hidden>
+            Encerrar campeonato
+          </button>
+        </div>
+        <div
+          id="cupOut"
+          style="display: flex; flex-direction: column; gap: 18px"
+        ></div>
+      </section>
+
+      <!-- PLACAR -->
+      <section class="view" id="v-placar" hidden>
+        <div class="view-head">
+          <div>
+            <h2>Placar</h2>
+            <p class="muted">
+              Toque no lado do time para marcar ponto. Quem marca, saca.
+              Teclado: ← e →.
+            </p>
+          </div>
+        </div>
+        <div id="liveBanner"></div>
+        <div class="court" id="court">
+          <button class="side" id="sideL" type="button"></button>
+          <div class="net" aria-hidden="true"></div>
+          <button class="side" id="sideR" type="button"></button>
+        </div>
+        <div class="sets" id="setHist"></div>
+        <div class="row edit">
+          <button class="btn" id="undo" type="button">Desfazer ponto</button>
+          <button class="btn" id="swap" type="button">Trocar lados</button>
+          <button class="btn ghost" id="resetLive" type="button">
+            Zerar jogo
+          </button>
+        </div>
+        <div class="panel edit">
+          <h3>Configurar jogo</h3>
+          <div class="row">
+            <div class="field">
+              <label for="lNameA">Time A</label
+              ><input type="text" id="lNameA" maxlength="30" />
+            </div>
+            <div class="field">
+              <label for="lColA">Cor A</label
+              ><select id="lColA"></select>
+            </div>
+            <div class="field">
+              <label for="lNameB">Time B</label
+              ><input type="text" id="lNameB" maxlength="30" />
+            </div>
+            <div class="field">
+              <label for="lColB">Cor B</label
+              ><select id="lColB"></select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="lBest">Sets</label
+              ><select id="lBest">
+                <option value="1">Set único</option>
+                <option value="3">Melhor de 3</option>
+                <option value="5">Melhor de 5</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="lTarget">Pontos por set</label
+              ><select id="lTarget">
+                <option>15</option>
+                <option>21</option>
+                <option>25</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="lTb">Tie-break</label
+              ><select id="lTb">
+                <option>15</option>
+                <option>21</option>
+                <option>25</option>
+              </select>
+            </div>
+          </div>
+          <div class="row" id="loadDrawRow" hidden>
+            <div class="field">
+              <label for="lFromA">Puxar do sorteio: Time A</label
+              ><select id="lFromA"></select>
+            </div>
+            <div class="field">
+              <label for="lFromB">Time B</label
+              ><select id="lFromB"></select>
+            </div>
+            <button
+              class="btn"
+              id="lLoad"
+              type="button"
+              style="align-self: flex-end"
+            >
+              Usar estes times
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CALENDARIO -->
+      <section class="view" id="v-calendario" hidden>
+        <div class="view-head">
+          <div>
+            <h2>Calendário de jogos</h2>
+            <p class="muted">
+              Marque o racha da semana, os jogos do campeonato e onde vai ser.
+            </p>
+          </div>
+        </div>
+        <div class="grid2">
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 20px;
+              min-width: 0;
+            "
+          >
+            <div class="panel">
+              <div class="cal-head">
+                <button
+                  class="btn sm"
+                  id="calPrev"
+                  type="button"
+                  aria-label="Mês anterior"
+                >
+                  ‹
+                </button>
+                <h3 id="calTitle"></h3>
+                <button
+                  class="btn sm"
+                  id="calNext"
+                  type="button"
+                  aria-label="Próximo mês"
+                >
+                  ›
+                </button>
+              </div>
+              <div class="cal" id="cal"></div>
+            </div>
+            <div class="panel edit">
+              <h3>Novo jogo</h3>
+              <form id="fGame" class="row" autocomplete="off">
+                <div class="field" style="flex-basis: 100%">
+                  <label for="gTitle">Título</label
+                  ><input
+                    type="text"
+                    id="gTitle"
+                    maxlength="50"
+                    placeholder="Ex.: Racha de sábado"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="gDate">Data</label
+                  ><input type="date" id="gDate" required />
+                </div>
+                <div class="field">
+                  <label for="gTime">Hora</label
+                  ><input type="time" id="gTime" value="09:00" />
+                </div>
+                <div class="field" style="flex-basis: 100%">
+                  <label for="gPlace">Local</label
+                  ><input
+                    type="text"
+                    id="gPlace"
+                    maxlength="60"
+                    placeholder="Ex.: Quadra da praça"
+                  />
+                </div>
+                <div class="field" style="flex-basis: 100%">
+                  <label for="gNote">Observação</label
+                  ><input
+                    type="text"
+                    id="gNote"
+                    maxlength="80"
+                    placeholder="Ex.: levar bola e rede"
+                  />
+                </div>
+                <button
+                  class="btn primary"
+                  type="submit"
+                  style="flex-basis: 100%"
+                >
+                  Salvar jogo
+                </button>
+              </form>
+            </div>
+          </div>
+          <div class="panel">
+            <h3 id="gListTitle">Próximos jogos</h3>
+            <ul class="glist" id="gList"></ul>
+            <details id="pastWrap" hidden>
+              <summary>Jogos passados</summary>
+              <ul class="glist" id="gPast" style="margin-top: 10px"></ul>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+    <dialog id="adminDialog">
+      <form id="adminForm">
+        <div class="view-head">
+          <h3>Acesso administrativo</h3>
+          <button class="btn sm ghost" id="closeAdmin" type="button">
+            Fechar
+          </button>
+        </div>
+        <p class="muted">
+          Visitantes podem consultar os dados. Use a senha geral para editar.
+        </p>
+        <div class="field">
+          <label for="adminPassword">Senha geral</label>
+          <input
+            type="password"
+            id="adminPassword"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <p class="muted" id="adminError" role="alert"></p>
+        <button class="btn primary" id="adminSubmit" type="submit">
+          Entrar
+        </button>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
