@@ -160,6 +160,15 @@ header.top {
   background: var(--navy);
   color: var(--on-navy);
   border-bottom: 4px solid var(--yellow);
+  transition: transform 220ms ease;
+}
+body.nav-hidden header.top {
+  transform: translateY(-100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  header.top {
+    transition: none;
+  }
 }
 .top .wrap {
   display: flex;

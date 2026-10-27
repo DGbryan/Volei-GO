@@ -425,6 +425,31 @@ import {
     window.scrollTo(0, 0);
   });
 
+  let lastScrollY = window.scrollY;
+  let scrollTicking = false;
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (scrollTicking) return;
+      scrollTicking = true;
+      window.requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const delta = currentY - lastScrollY;
+        const dialogOpen = $("#adminDialog").open;
+
+        if (dialogOpen || currentY < 80 || delta < -8) {
+          document.body.classList.remove("nav-hidden");
+        } else if (currentY > 100 && delta > 8) {
+          document.body.classList.add("nav-hidden");
+        }
+
+        lastScrollY = currentY;
+        scrollTicking = false;
+      });
+    },
+    { passive: true },
+  );
+
   let lock = null;
   async function wake() {
     try {
